@@ -1,0 +1,19 @@
+[package]
+name = "shutdown-handler"
+version = "0.1.0"
+authors = ["Conrad Ludgate <conrad.ludgate@truelayer.com>"]
+edition = "2021"
+description = "A shutdown handler that allows all parts of an application to trigger a shutdown."
+repository = "https://github.com/TrueLayer/shutdown-handler"
+license = "MIT OR Apache-2.0"
+keywords = ["shutdown", "graceful-shutdown", "async"]
+categories = ["asynchronous"]
+
+[dependencies]
+tokio = { version = "1", features = ["signal", "sync", "rt"] }
+pin-project-lite = "0.2"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full"] }
+libc = "0.2"
+signal-hook = "0.2"
