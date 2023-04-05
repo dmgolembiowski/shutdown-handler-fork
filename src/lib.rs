@@ -94,12 +94,13 @@
 //! }
 //! ```
 
-use futures_util::{
-    future::{select, Either},
-    Future,
-};
 use pin_project_lite::pin_project;
-use std::sync::{atomic::AtomicBool, Arc};
+use std::{
+    future::Future,
+    pin::{pin, Pin},
+    sync::{atomic::AtomicBool, Arc},
+    task::Poll,
+};
 use tokio::{
     signal::unix::{signal, SignalKind},
     sync::{futures::Notified, Notify},
@@ -268,12 +269,21 @@ impl ShutdownHandler {
     /// # }
     /// ```
     pub async fn wait_for_signal_or_future<F: Future + Unpin>(&self, f: F) -> SignalOrComplete<F> {
-        let handle = self.wait_for_signal();
-        tokio::pin!(handle);
-        match select(handle, f).await {
-            Either::Left((_signal, f)) => SignalOrComplete::ShutdownSignal(f),
-            Either::Right((res, _)) => SignalOrComplete::Completed(res),
-        }
+        let mut handle = pin!(self.wait_for_signal());
+        let mut f = Some(f);
+
+        std::future::poll_fn(|cx| {
+            if let Poll::Ready(_signal) = handle.as_mut().poll(cx) {
+                return Poll::Ready(SignalOrComplete::ShutdownSignal(f.take().unwrap()));
+            }
+
+            if let Poll::Ready(res) = Pin::new(f.as_mut().unwrap()).poll(cx) {
+                return Poll::Ready(SignalOrComplete::Completed(res));
+            }
+
+            Poll::Pending
+        })
+        .await
     }
 }
 
