@@ -1,6 +1,6 @@
 [package]
 name = "shutdown-handler"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Conrad Ludgate <conrad.ludgate@truelayer.com>"]
 edition = "2021"
 description = "A shutdown handler that allows all parts of an application to trigger a shutdown."
@@ -15,5 +15,4 @@ pin-project-lite = "0.2"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["full"] }
-libc = "0.2"
-signal-hook = "0.2"
+nix = "0.26.2"
