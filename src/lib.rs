@@ -93,6 +93,7 @@
 //!     }
 //! }
 //! ```
+#![feature(pin_macro)]
 
 use pin_project_lite::pin_project;
 use std::{
